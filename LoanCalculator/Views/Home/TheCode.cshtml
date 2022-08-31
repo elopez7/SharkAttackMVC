@@ -1,0 +1,118 @@
+﻿@{
+    ViewData["Title"] = "The Code";
+}
+
+
+<main class="flex-shrink-0">
+    <div class="container py-5 px-5 mt-5">
+        <h2 class="border-1 border-bottom border-dark">The Code for APP NAME</h2>
+        <div class="row row-cols-1 row-cols-md-2">
+            <div class="col-lg-8">
+                <pre class="line-numbers">
+                <code class="language-csharp">
+
+                    using LoanCalculator.Models;
+
+                    namespace LoanCalculator.Helpers
+                    {
+                        public class LoanHelper
+                        {
+                            public LoanModel GetPayments(LoanModel loan)
+                            {
+                                loan.Payment = CalculatePayment(loan.Amount, loan.Rate, loan.Term);
+
+                                var balance = loan.Amount;
+                                var totalInterest = 0.0m;
+                                var monthlyInterest = 0.0m;
+                                var monthlyPrincipal = 0.0m;
+                                var monthlyRate = CalculateMonthlyRate(loan.Rate);
+
+                                for(int month = 0; month <= loan.Term; month++)
+                                {
+                                    monthlyInterest = CalculateMonthlyInterest(balance, monthlyRate);
+                                    totalInterest += monthlyInterest;
+                                    monthlyPrincipal = loan.Payment - monthlyInterest;
+                                    balance -= monthlyPrincipal;
+
+                                    LoanPaymentModel loanPayment = new();
+
+                                    loanPayment.Month = month;
+                                    loanPayment.Payment = loan.Payment;
+                                    loanPayment.MonthlyPrincipal = monthlyPrincipal;
+                                    loanPayment.MonthlyInterest = monthlyInterest;
+                                    loanPayment.TotalInterest = totalInterest;
+                                    loanPayment.Balance = balance;
+
+                                    loan.Payments.Add(loanPayment);
+                                }
+
+                                loan.TotalInterest = totalInterest;
+                                loan.TotalCost = loan.Amount + totalInterest;
+
+                                return loan;
+                            }
+
+                            private decimal CalculatePayment(decimal amount, decimal rate, int term)
+                            {
+                                decimal monthlyRate = CalculateMonthlyRate(rate);
+
+                                var rateDouble = Convert.ToDouble(monthlyRate);
+                                var amountDouble = Convert.ToDouble(amount);
+
+                                var paymentDouble = (amountDouble * rateDouble) / (1 - Math.Pow(1 + rateDouble, -term));
+
+                                return Convert.ToDecimal(paymentDouble);
+
+                            }
+
+                            private decimal CalculateMonthlyRate(decimal rate)
+                            {
+                                return rate / 1200;
+                            }
+
+                            private decimal CalculateMonthlyInterest(decimal balance, decimal monthlyRate)
+                            {
+                                return balance * monthlyRate;
+                            }
+                        }
+                    }
+
+
+                </code>
+                </pre>
+            </div>
+            <div class="col-lg-4">
+                <p>This is a summary of the code specific to FizzBuzz. Other MVC Code has been removed.</p>
+                <h5>LoanHelper Class</h5>
+                <p>The <strong>LoanHelper</strong> class contains all the functionality that makes the loan calculations possible. The class is used by the <strong>IActionResult</strong> functions contained in the home controller.</p>
+                <br />
+                <h5>GetPayments()</h5>
+                <p><strong>GetPaymnets()</strong> The get payments function takes in a Loan model from the form and uses its data to calculate all the variables within the LoanHelper class. It returns a loan object with updated data after the calculations have been made.</p>
+                <br />
+                <h5>CalculatePayment()</h5>
+                <p><strong>CalculatePayment()</strong> takes an amount, rate and term decimal variables and uses them to calculate the monthly payment required for the loan.</p>
+                <h5>CalculateMonthlyRate()</h5>
+                <p><strong>CalculateMonthlyRate()</strong> calculates the monthly rate by dividing the total rate by 1200.</p>
+                <h5>CalculateMonthlyInterest()</h5>
+                <p><strong>CalculateMonthlyInterest()</strong> Takes in the current balance and the monthly rate. multiplies them together to calculate the monthly interest.</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+@section Styles{
+    <link href="/css/prism.css" rel="stylesheet">
+}
+
+    @section Scripts{
+    <script src="/js/prism.js"></script>
+    <script>
+        Prism.plugins.NormalizeWhitespace.setDefaults({
+            'remove-trailing': true,
+            'remove-indent': true,
+            'left-trim': true,
+            'right-trim': true
+        })
+    </script>
+}
